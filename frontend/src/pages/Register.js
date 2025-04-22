@@ -13,20 +13,61 @@ const Register = () => {
     confirmPassword: '',
   });
   const [errorMessage, setErrorMessage] = useState('');
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // First Name validation
+    if (!formData.firstName || formData.firstName.length < 2) {
+      newErrors.firstName = 'First name must be at least 2 characters long';
+    }
+    
+    // Last Name validation
+    if (!formData.lastName || formData.lastName.length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters long';
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Password validation
+    if (!formData.password || formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long';
+    }
+    
+    // Confirm Password validation
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (errors[e.target.name]) {
+      setErrors({
+        ...errors,
+        [e.target.name]: ''
+      });
+    }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
     
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMessage("Passwords don't match");
+    if (!validateForm()) {
       return;
     }
 
@@ -38,11 +79,17 @@ const Register = () => {
         password: formData.password
       });
 
-      if (response.data) {
+      if (response.data === "Registration successful") {
         navigate('/login');
+      } else {
+        setErrorMessage(response.data || 'Registration failed. Please try again.');
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Registration failed. Please try again.');
+      if (error.response?.data === "Email already exists") {
+        setErrorMessage('Email already exists. Please use a different email.');
+      } else {
+        setErrorMessage(error.response?.data || 'Registration failed. Please try again.');
+      }
     }
   };
 
@@ -60,6 +107,7 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+            {errors.firstName && <p className="error-message">{errors.firstName}</p>}
 
             <input
               type="text"
@@ -69,6 +117,7 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+            {errors.lastName && <p className="error-message">{errors.lastName}</p>}
 
             <input
               type="email"
@@ -78,6 +127,7 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+            {errors.email && <p className="error-message">{errors.email}</p>}
 
             <input
               type="password"
@@ -87,6 +137,7 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+            {errors.password && <p className="error-message">{errors.password}</p>}
 
             <input
               type="password"
@@ -96,6 +147,7 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+            {errors.confirmPassword && <p className="error-message">{errors.confirmPassword}</p>}
 
             {errorMessage && <p className="error-message">{errorMessage}</p>}
 
