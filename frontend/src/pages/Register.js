@@ -14,6 +14,7 @@ const Register = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -72,23 +73,39 @@ const Register = () => {
     }
 
     try {
+      console.log('Sending registration request to:', `${BASEURL}/api/v1/auth/register`);
       const response = await axios.post(`${BASEURL}/api/v1/auth/register`, {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password
       });
+      
+      console.log('Registration response:', response.data);
 
-      if (response.data === "Registration successful") {
+      // Check if the response contains "successful" in any case
+      if (response.data && response.data.toLowerCase().includes('successful')) {
         navigate('/login');
       } else {
         setErrorMessage(response.data || 'Registration failed. Please try again.');
       }
     } catch (error) {
-      if (error.response?.data === "Email already exists") {
-        setErrorMessage('Email already exists. Please use a different email.');
+      console.error('Registration error:', error);
+      
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        
+        if (error.response.data === "Email already exists") {
+          setErrorMessage('Email already exists. Please use a different email.');
+        } else {
+          setErrorMessage(error.response.data || 'Registration failed. Please try again.');
+        }
+      } else if (error.request) {
+        console.error('Error request:', error.request);
+        setErrorMessage('Network error. Please check your connection and try again.');
       } else {
-        setErrorMessage(error.response?.data || 'Registration failed. Please try again.');
+        console.error('Error message:', error.message);
+        setErrorMessage('An unexpected error occurred. Please try again.');
       }
     }
   };
@@ -151,7 +168,9 @@ const Register = () => {
 
             {errorMessage && <p className="error-message">{errorMessage}</p>}
 
-            <button type="submit" className="login-button">Register</button>
+            <button type="submit" className="login-button" disabled={isLoading}>
+              {isLoading ? 'Registering...' : 'Register'}
+            </button>
             
             <p style={{ marginTop: '10px', textAlign: 'center' }}>
               Already have an account? <Link to="/login">Login</Link>
