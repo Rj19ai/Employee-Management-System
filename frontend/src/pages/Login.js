@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import validations from '../utils/validation'; 
 import '../css/Login.css';
@@ -58,6 +58,10 @@ const Login = () => {
             {errorMessage && <p className="error-message">{errorMessage}</p>}
 
             <button type="submit" className="login-button">Login</button>
+            
+            <p style={{ marginTop: '10px', textAlign: 'center' }}>
+              Don't have an account? <Link to="/register">Register</Link>
+            </p>
           </form>
         </div>
       </div>

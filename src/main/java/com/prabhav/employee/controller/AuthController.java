@@ -1,8 +1,8 @@
 package com.prabhav.employee.controller;
 
-
 import com.prabhav.employee.auth.AuthService;
 import com.prabhav.employee.dto.LoginRequest;
+import com.prabhav.employee.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,5 +20,15 @@ public class AuthController {
     public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request) {
         String token = authService.login(request.getEmail(), request.getPassword());
         return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
+        String result = authService.register(
+                request.getFirstName(),
+                request.getLastName(),
+                request.getEmail(),
+                request.getPassword());
+        return ResponseEntity.ok(result);
     }
 }
