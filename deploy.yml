@@ -1,0 +1,29 @@
+---
+- name: Deploy Employee Management Containers
+  hosts: localhost
+  become: true
+
+  tasks:
+    - name: Ensure Docker is running
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Remove old backend container (if any)
+      command: docker rm -f emp-backend-container
+      ignore_errors: yes
+
+    - name: Remove old frontend container (if any)
+      command: docker rm -f emp-frontend-container
+      ignore_errors: yes
+
+    - name: Run backend container
+      command: >
+        docker run -d --name emp-backend-container
+        -p 9192:9192 pgp2024019/employee-backend:latest
+
+    - name: Run frontend container
+      command: >
+        docker run -d --name emp-frontend-container
+        -p 3000:80 pgp2024019/employee-frontend:latest
